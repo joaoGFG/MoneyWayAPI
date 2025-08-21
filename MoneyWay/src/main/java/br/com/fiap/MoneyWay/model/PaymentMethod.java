@@ -1,14 +1,13 @@
 package br.com.fiap.MoneyWay.model;
 
-public class Category {
+public class PaymentMethod {
     private Long id;
     private String name;
-    private String icon;
 
-    public Category(Long id, String name, String icon) {
+    
+    public PaymentMethod(Long id, String name) {
         this.id = id;
         this.name = name;
-        this.icon = icon;
     }
 
     public Long getId() {
@@ -17,10 +16,6 @@ public class Category {
 
     public String getName() {
         return name;
-    }
-
-    public String getIcon() {
-        return icon;
     }
 
 }
