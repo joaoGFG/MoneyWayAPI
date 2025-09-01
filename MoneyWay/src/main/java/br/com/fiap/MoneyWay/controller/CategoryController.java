@@ -1,67 +1,53 @@
 package br.com.fiap.MoneyWay.controller;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.Random;
-
-import org.springframework.web.bind.annotation.RestController;
-
-import br.com.fiap.MoneyWay.model.Category;
-import lombok.extern.slf4j.Slf4j;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.*;
+import br.com.fiap.MoneyWay.model.Category;
+import br.com.fiap.MoneyWay.repository.CategoryRepository;
+import lombok.extern.slf4j.Slf4j;
 
-@RequestMapping("/categories")
 @RestController
 @Slf4j
+@RequestMapping("/categories")
 public class CategoryController {
 
-    private List<Category> repository = new ArrayList<>();
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     @GetMapping
     public List<Category> index(){
-        return repository;
+        return categoryRepository.findAll();
     }
 
     @PostMapping
-    @ResponseStatus(code = HttpStatus.CREATED)
-    public Category create(@RequestBody Category category){
-        category.setId(Math.abs(new Random().nextLong()));
-        log.info("criando categoria " + category);
-        repository.add(category);
-        return category;
+    public ResponseEntity<Category> create(@RequestBody Category category){
+        log.info("criando categoria: " + category);
+
+        Category savedCategory = categoryRepository.save(category);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedCategory);
     }
 
     @GetMapping("{id}")
     public ResponseEntity<Category> get(@PathVariable Long id){
-        log.info("buscando categoria com id " + id);
-        var categoryFound = getCategoryById(id);
+        log.info("buscando categoria com id: " + id);
 
-        if (categoryFound.isEmpty()) return ResponseEntity.notFound().build();
-
-        return ResponseEntity.ok(categoryFound.get());
+        return categoryRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("{id}")
     public ResponseEntity<Void> destroy(@PathVariable Long id){
-        log.info("apagando categoria com id {}", id);
+        log.info("apagando categoria com id: {}", id);
 
-        var categoryFound = getCategoryById(id);
+        if (!categoryRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
 
-        if (categoryFound.isEmpty()) return ResponseEntity.notFound().build();
-        
-        repository.remove(categoryFound.get());
-
+        categoryRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -69,25 +55,13 @@ public class CategoryController {
     public ResponseEntity<Category> update(@RequestBody Category categoryUpdated, @PathVariable Long id){
         log.info("atualizando categoria {} com id {}", categoryUpdated, id);
 
-        var categoryFound = getCategoryById(id);
-
-        if (categoryFound.isEmpty()) return ResponseEntity.notFound().build();
-
-        repository.remove(categoryFound.get());
-        categoryUpdated.setId(id);
-        repository.add(categoryUpdated);
-
-        return ResponseEntity.ok(categoryUpdated);
-
+        return categoryRepository.findById(id)
+                .map(existingCategory -> {
+                    categoryUpdated.setId(id);
+                    Category updatedCategory = categoryRepository.save(categoryUpdated);
+                    return ResponseEntity.ok(updatedCategory);
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
-
-    private Optional<Category> getCategoryById(Long id) {
-        var categoryFound = repository.stream()
-            .filter(category -> category.getId().equals(id))
-            .findFirst();
-        return categoryFound;
-    }   
 }
-    
-
 
