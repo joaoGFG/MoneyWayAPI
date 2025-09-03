@@ -32,8 +32,6 @@ public class CategoryController {
 
     @GetMapping("{id}")
     public ResponseEntity<Category> get(@PathVariable Long id){
-        log.info("buscando categoria com id: " + id);
-
         return categoryRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
