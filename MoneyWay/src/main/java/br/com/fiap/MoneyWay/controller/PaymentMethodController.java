@@ -1,12 +1,9 @@
 package br.com.fiap.MoneyWay.controller;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.Random;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,8 +13,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import br.com.fiap.MoneyWay.model.PaymentMethod;
+import br.com.fiap.MoneyWay.repository.PaymentMethodRepository;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
@@ -25,57 +24,47 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/payment-methods")
 public class PaymentMethodController {
 
-    private List<PaymentMethod> repository = new ArrayList<>();
+    @Autowired
+    private PaymentMethodRepository paymentMethodRepository;
 
     @GetMapping
     public List<PaymentMethod> index(){
-        return repository;
-    }
-
-    @GetMapping("{id}")
-    public ResponseEntity<PaymentMethod> getPaymentMethodId(@PathVariable Long id){
-        log.info("buscando metodo de pagamento com id" + id);
-        var paymentMethodFound = getPaymentMethodById(id);
-
-        return paymentMethodFound.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return paymentMethodRepository.findAll();
     }
 
     @PostMapping
-    @ResponseStatus(code = HttpStatus.CREATED)  
-    public ResponseEntity<PaymentMethod> create(@RequestBody PaymentMethod paymentMethod){
-        paymentMethod.setId(Math.abs(new Random().nextLong()));
-        log.info("métodos de pagamento: " + paymentMethod);
-        repository.add(paymentMethod);
-        return ResponseEntity.status(HttpStatus.CREATED).body(paymentMethod);
+    @ResponseStatus(HttpStatus.CREATED)
+    public PaymentMethod create(@RequestBody PaymentMethod paymentMethod){
+        log.info("criando método de pagamento " + paymentMethod);
+        return paymentMethodRepository.save(paymentMethod);
+    }
+
+    @GetMapping("{id}")
+    public PaymentMethod get(@PathVariable Long id){
+        log.info("buscando método de pagamento com id " + id);
+        return getPaymentMethodById(id);
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<PaymentMethod> updatePaymentMethod(@RequestBody PaymentMethod paymentMethodUp , @PathVariable Long id){
-        var paymentMethodFound = getPaymentMethodById(id);
-
-        if(paymentMethodFound.isEmpty()) return ResponseEntity.notFound().build();
-
-        repository.remove(paymentMethodFound.get());
-        paymentMethodUp.setId(id);
-        repository.add(paymentMethodUp);
-
-        return ResponseEntity.ok(paymentMethodUp);
+    public PaymentMethod update(@RequestBody PaymentMethod paymentMethodUpdated, @PathVariable Long id){
+        log.info("atualizando método de pagamento {} com id {}", paymentMethodUpdated, id);
+        getPaymentMethodById(id); 
+        paymentMethodUpdated.setId(id);
+        return paymentMethodRepository.save(paymentMethodUpdated);
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<Void> destroy(@PathVariable Long id){
-        var paymentMethodFound = getPaymentMethodById(id);
-
-        if (paymentMethodFound.isEmpty())return ResponseEntity.notFound().build();
-
-        repository.remove(paymentMethodFound.get());
-        return ResponseEntity.noContent().build();
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void destroy(@PathVariable Long id){
+        log.info("apagando método de pagamento com id {}", id);
+        paymentMethodRepository.delete(getPaymentMethodById(id));
     }
 
-    private Optional<PaymentMethod> getPaymentMethodById(Long id) {
-        var paymentMethodFound = repository.stream()
-                .filter(paymentMethod -> paymentMethod.getId().equals(id))
-                .findFirst();
-        return paymentMethodFound;
+    private PaymentMethod getPaymentMethodById(Long id) {
+        return paymentMethodRepository
+                .findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Método de pagamento não encontrado com id " + id
+                ));
     }
 }
