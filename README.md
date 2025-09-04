@@ -1,0 +1,1 @@
+# MoneyWay - Gerenciador de Finanças
