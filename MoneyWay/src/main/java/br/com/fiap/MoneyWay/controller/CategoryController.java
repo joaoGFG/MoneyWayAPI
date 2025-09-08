@@ -17,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import br.com.fiap.MoneyWay.model.Category;
 import br.com.fiap.MoneyWay.repository.CategoryRepository;
+import br.com.fiap.MoneyWay.service.CategoryService;
 import lombok.extern.slf4j.Slf4j;
 
 @RequestMapping("/categories")
@@ -27,6 +28,8 @@ public class CategoryController {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    private CategoryService categoryService;
+
     @GetMapping
     public List<Category> index(){
         return categoryRepository.findAll();
@@ -36,7 +39,8 @@ public class CategoryController {
     @ResponseStatus(HttpStatus.CREATED)
     public Category create(@RequestBody Category category){
         log.info("criando categoria " + category);
-        return categoryRepository.save(category);
+
+        return categoryService.save(category);
     }
 
     @GetMapping("{id}")
