@@ -1,0 +1,9 @@
+transaction.description.notblank=field required
+transaction.description.size=at least {min} characters
+transaction.description.positive=must be positive
+transaction.description.pastorpresent=can't be in future
+
+category.name.notblank=field required
+category.icon.notblank=field required
+category.icon.pattern=must start with uppercase letter
+icon.valid=icon invalid

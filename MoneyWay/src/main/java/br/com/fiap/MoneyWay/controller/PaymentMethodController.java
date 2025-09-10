@@ -1,10 +1,20 @@
 package br.com.fiap.MoneyWay.controller;
 
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
 import br.com.fiap.MoneyWay.model.PaymentMethod;
 import br.com.fiap.MoneyWay.repository.PaymentMethodRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -22,42 +32,39 @@ public class PaymentMethodController {
         return paymentMethodRepository.findAll();
     }
 
-    @GetMapping("{id}")
-    public ResponseEntity<PaymentMethod> getPaymentMethodId(@PathVariable Long id){
-        log.info("buscando método de pagamento com id: " + id);
-
-        return paymentMethodRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public PaymentMethod create(@RequestBody PaymentMethod paymentMethod){
+        log.info("criando método de pagamento " + paymentMethod);
+        return paymentMethodRepository.save(paymentMethod);
     }
 
-    @PostMapping
-    public ResponseEntity<PaymentMethod> create(@RequestBody PaymentMethod paymentMethod){
-        log.info("criando método de pagamento: " + paymentMethod);
-
-        PaymentMethod savedPaymentMethod = paymentMethodRepository.save(paymentMethod);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedPaymentMethod);
+    @GetMapping("{id}")
+    public PaymentMethod get(@PathVariable Long id){
+        log.info("buscando método de pagamento com id " + id);
+        return getPaymentMethodById(id);
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<PaymentMethod> updatePaymentMethod(@RequestBody PaymentMethod paymentMethodUp, @PathVariable Long id){
-        return paymentMethodRepository.findById(id)
-                .map(existingPaymentMethod -> {
-                    paymentMethodUp.setId(id);
-                    PaymentMethod updatedPaymentMethod = paymentMethodRepository.save(paymentMethodUp);
-                    return ResponseEntity.ok(updatedPaymentMethod);
-                })
-                .orElse(ResponseEntity.notFound().build());
+    public PaymentMethod update(@RequestBody PaymentMethod paymentMethodUpdated, @PathVariable Long id){
+        log.info("atualizando método de pagamento {} com id {}", paymentMethodUpdated, id);
+        getPaymentMethodById(id);
+        paymentMethodUpdated.setId(id);
+        return paymentMethodRepository.save(paymentMethodUpdated);
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<Void> destroy(@PathVariable Long id){
-        if (!paymentMethodRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void destroy(@PathVariable Long id){
+        log.info("apagando método de pagamento com id {}", id);
+        paymentMethodRepository.delete(getPaymentMethodById(id));
+    }
 
-        paymentMethodRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
+    private PaymentMethod getPaymentMethodById(Long id) {
+        return paymentMethodRepository
+                .findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Método de pagamento não encontrado com id " + id
+                ));
     }
 }
-

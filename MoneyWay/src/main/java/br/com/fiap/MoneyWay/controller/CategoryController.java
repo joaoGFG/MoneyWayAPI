@@ -1,21 +1,34 @@
 package br.com.fiap.MoneyWay.controller;
 
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
 import br.com.fiap.MoneyWay.model.Category;
 import br.com.fiap.MoneyWay.repository.CategoryRepository;
+import br.com.fiap.MoneyWay.service.CategoryService;
 import lombok.extern.slf4j.Slf4j;
 
+@RequestMapping("/categories")
 @RestController
 @Slf4j
-@RequestMapping("/categories")
 public class CategoryController {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    private CategoryService categoryService;
 
     @GetMapping
     public List<Category> index(){
@@ -23,43 +36,37 @@ public class CategoryController {
     }
 
     @PostMapping
-    public ResponseEntity<Category> create(@RequestBody Category category){
-        log.info("criando categoria: " + category);
+    @ResponseStatus(HttpStatus.CREATED)
+    public Category create(@RequestBody Category category){
+        log.info("criando categoria " + category);
 
-        Category savedCategory = categoryRepository.save(category);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedCategory);
+        return categoryService.save(category);
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<Category> get(@PathVariable Long id){
-        return categoryRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public Category get(@PathVariable Long id){
+        log.info("buscando categoria com id " + id);
+        return getCategoryById(id);
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<Void> destroy(@PathVariable Long id){
-        log.info("apagando categoria com id: {}", id);
-
-        if (!categoryRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-
-        categoryRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void destroy(@PathVariable Long id){
+        log.info("apagando categoria com id {}", id);
+        categoryRepository.delete(getCategoryById(id));
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<Category> update(@RequestBody Category categoryUpdated, @PathVariable Long id){
+    public Category update(@RequestBody Category categoryUpdated, @PathVariable Long id){
         log.info("atualizando categoria {} com id {}", categoryUpdated, id);
+        getCategoryById(id);
+        categoryUpdated.setId(id);
+        return categoryRepository.save(categoryUpdated);
+    }
 
-        return categoryRepository.findById(id)
-                .map(existingCategory -> {
-                    categoryUpdated.setId(id);
-                    Category updatedCategory = categoryRepository.save(categoryUpdated);
-                    return ResponseEntity.ok(updatedCategory);
-                })
-                .orElse(ResponseEntity.notFound().build());
+    private Category getCategoryById(Long id) {
+        return categoryRepository
+                .findById(id)
+                .orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa não encontrada com id " + id));
     }
 }
-

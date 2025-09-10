@@ -1,36 +1,38 @@
 package br.com.fiap.MoneyWay.model;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
+import lombok.Data;
 
-@Entity
-@Table(name = "transaction")
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Entity
 public class Transaction {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank
-    @Size(min = 3, max = 255)
+    @Size(min = 2, max = 255)
     private String description;
 
-    @Positive
+    @Positive(message = "{transaction.amount.positive}")
     private BigDecimal amount;
 
-    @PastOrPresent
+    @PastOrPresent(message = "{transaction.date.pastorpresent}")
     private LocalDate date;
-
 
     @Enumerated(EnumType.STRING)
     private TransactionType type;
+
 }
