@@ -13,10 +13,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import br.com.fiap.MoneyWay.model.PaymentMethod;
 import br.com.fiap.MoneyWay.repository.PaymentMethodRepository;
+import br.com.fiap.MoneyWay.service.PaymentMethodService;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
@@ -27,6 +28,9 @@ public class PaymentMethodController {
     @Autowired
     private PaymentMethodRepository paymentMethodRepository;
 
+    @Autowired
+    private PaymentMethodService paymentMethodService;
+
     @GetMapping
     public List<PaymentMethod> index(){
         return paymentMethodRepository.findAll();
@@ -34,37 +38,27 @@ public class PaymentMethodController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PaymentMethod create(@RequestBody PaymentMethod paymentMethod){
+    public PaymentMethod create(@RequestBody @Valid PaymentMethod paymentMethod){
         log.info("criando método de pagamento " + paymentMethod);
-        return paymentMethodRepository.save(paymentMethod);
+        return paymentMethodService.save(paymentMethod);
     }
 
     @GetMapping("{id}")
     public PaymentMethod get(@PathVariable Long id){
         log.info("buscando método de pagamento com id " + id);
-        return getPaymentMethodById(id);
+        return paymentMethodService.findById(id);
     }
 
     @PutMapping("{id}")
-    public PaymentMethod update(@RequestBody PaymentMethod paymentMethodUpdated, @PathVariable Long id){
+    public PaymentMethod update(@RequestBody @Valid PaymentMethod paymentMethodUpdated, @PathVariable Long id){
         log.info("atualizando método de pagamento {} com id {}", paymentMethodUpdated, id);
-        getPaymentMethodById(id);
-        paymentMethodUpdated.setId(id);
-        return paymentMethodRepository.save(paymentMethodUpdated);
+        return paymentMethodService.update(paymentMethodUpdated, id);
     }
 
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void destroy(@PathVariable Long id){
         log.info("apagando método de pagamento com id {}", id);
-        paymentMethodRepository.delete(getPaymentMethodById(id));
-    }
-
-    private PaymentMethod getPaymentMethodById(Long id) {
-        return paymentMethodRepository
-                .findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Método de pagamento não encontrado com id " + id
-                ));
+        paymentMethodService.delete(id);
     }
 }

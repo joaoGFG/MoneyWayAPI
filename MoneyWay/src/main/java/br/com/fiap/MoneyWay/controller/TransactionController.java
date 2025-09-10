@@ -10,13 +10,12 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.fiap.MoneyWay.model.Transaction;
-import br.com.fiap.MoneyWay.repository.TransactionRepository;
+import br.com.fiap.MoneyWay.service.TransactionService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-
 
 @RestController
 @RequestMapping("/transactions")
@@ -24,19 +23,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class TransactionController {
 
     @Autowired
-    private TransactionRepository repository;
-
+    private TransactionService transactionService;
 
     @GetMapping
     public List<Transaction> index() {
-        return repository.findAll();
+        return transactionService.findAll();
     }
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     public Transaction create(@RequestBody @Valid Transaction transaction){
         log.info("criando transação " + transaction);
-        return repository.save(transaction);
+        return transactionService.save(transaction);
     }
-
 }

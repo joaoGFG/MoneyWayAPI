@@ -1,0 +1,4 @@
+transaction.amount.positive=O valor deve ser positivo
+transaction.date.pastorpresent=A data não pode ser futura
+transaction.amount.invalid=Valor deve ser positivo e não pode exceder R$ 999.999,99
+icon.valid=Ícone deve ser um dos valores permitidos
