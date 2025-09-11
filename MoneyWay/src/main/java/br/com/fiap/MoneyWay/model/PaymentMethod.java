@@ -16,15 +16,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Entity
 public class PaymentMethod {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    
+    @Id 
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
-    @Size(min = 2, max = 255)
+    @NotBlank(message = "{paymentMethod.name.notblank}")
+    @Size(min = 2, max = 50, message = "{paymentMethod.name.size}")
     @Column(nullable = false, length = 50)
     private String name;
 
-    @Size(min = 2, max = 200)
+    @Size(min = 2, max = 200, message = "{paymentMethod.description.size}")
     @Column(length = 200)
     private String description;
 }
