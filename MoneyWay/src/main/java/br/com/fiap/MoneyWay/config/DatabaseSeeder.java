@@ -41,7 +41,7 @@ public class DatabaseSeeder {
 
         var descriptions = List.of(
             "Livro de Java", "Mensalidade da Faculdade", "Bilhete Único", "Taxa do uber",
-            "Cinema domingo", "Futebol com amigos", "Cerveja gelada"); 
+            "Cinema domingo", "Futebol com amigos", "Cerveja gelada", "Entretenimento"); 
 
         for(int i = 0; i < 50; i++){
         transactionRepository.saveAll(List.of(
