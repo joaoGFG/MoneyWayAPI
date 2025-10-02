@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.http.HttpStatus;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.fiap.MoneyWay.filter.TransactionSpecification;
 import br.com.fiap.MoneyWay.model.Transaction;
 import br.com.fiap.MoneyWay.model.TransactionsFilters;
 import br.com.fiap.MoneyWay.repository.TransactionRepository;
@@ -38,13 +41,9 @@ public class TransactionController {
 
 
     @GetMapping
-    public List<Transaction> index( 
-        @RequestParam(required = false) String description,
-        @RequestParam(required = false) LocalDate date
-    ){
-        log.info("Filtrando por descrição {} e data {}", description, date);
-        var filters = new TransactionsFilters(description, date);
-        return transactionService.getTransactions(filters);
+    public List<Transaction> index(TransactionsFilters filters){
+        var specification = TransactionSpecification.build(filters);
+        return transactionService.getTransactions(specification);
     }
 
     @PostMapping()

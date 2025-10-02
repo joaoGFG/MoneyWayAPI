@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import br.com.fiap.MoneyWay.model.Transaction;
 import br.com.fiap.MoneyWay.model.TransactionsFilters;
@@ -15,19 +16,19 @@ public class TransactionService {
     @Autowired
     private TransactionRepository repository;
 
-    public List<Transaction> getTransactions(TransactionsFilters filters){
-        var probe = Transaction.builder()
-            .description(filters.description())  
-            .date(filters.date())                
-            .build();
+    public List<Transaction> getTransactions(Specification<Transaction> specification){
+        //var probe = Transaction.builder()
+           // .description(filters.description())  
+         //   .date(filters.date())                
+        //    .build();
 
-        var matcher = ExampleMatcher.matchingAll()
-            .withIgnoreNullValues()
-            .withIgnoreCase()
-            .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
+       // var matcher = ExampleMatcher.matchingAll()
+        //    .withIgnoreNullValues()
+        //    .withIgnoreCase()
+        //    .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
 
-        var example = Example.of(probe, matcher);
+        //var example = Example.of(probe, matcher);
 
-        return repository.findAll(example);
+        return repository.findAll(specification);
     }
 }

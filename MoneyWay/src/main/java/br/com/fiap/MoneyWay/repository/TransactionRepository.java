@@ -4,9 +4,11 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
 import br.com.fiap.MoneyWay.model.Transaction;
 
-public interface TransactionRepository extends JpaRepository<Transaction, Long>{
+public interface TransactionRepository extends JpaRepository<Transaction, Long>, JpaSpecificationExecutor<Transaction>{
 
     //@Query("SELECT t FROM Transaction WHERE date > now()")
     //List<Transaction> findByDescriptionContainingIgnoreCase(String description);
