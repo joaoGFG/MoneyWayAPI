@@ -17,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import br.com.fiap.MoneyWay.model.Category;
 import br.com.fiap.MoneyWay.repository.CategoryRepository;
+import io.swagger.v3.oas.annotations.Operation;
 //import br.com.fiap.MoneyWay.service.CategoryService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,6 +39,10 @@ public class CategoryController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @Operation(
+        summary = "Cria uma categoria de movimentação",
+        description = "Criando"    
+    )
     public Category create(@RequestBody Category category){
         log.info("criando categoria " + category);
 
