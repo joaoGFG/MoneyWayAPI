@@ -4,6 +4,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import br.com.fiap.MoneyWay.model.Transaction;
@@ -16,7 +18,8 @@ public class TransactionService {
     @Autowired
     private TransactionRepository repository;
 
-    public List<Transaction> getTransactions(Specification<Transaction> specification){
+     public Page<Transaction> getTransactions(Specification<Transaction> specification, Pageable pageable) {
+        return repository.findAll(specification, pageable);
         //var probe = Transaction.builder()
            // .description(filters.description())  
          //   .date(filters.date())                
@@ -29,6 +32,5 @@ public class TransactionService {
 
         //var example = Example.of(probe, matcher);
 
-        return repository.findAll(specification);
     }
 }

@@ -12,6 +12,10 @@ import java.time.LocalDate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -41,9 +45,9 @@ public class TransactionController {
 
 
     @GetMapping
-    public List<Transaction> index(TransactionsFilters filters){
+    public Page<Transaction> index(TransactionsFilters filters, @PageableDefault(size = 10, sort = "date", direction = Direction.DESC) Pageable pageable){
         var specification = TransactionSpecification.build(filters);
-        return transactionService.getTransactions(specification);
+        return transactionService.getTransactions(specification, pageable);
     }
 
     @PostMapping()
